@@ -8,6 +8,10 @@ const team_name ="YOUR_ESA_TEAM_NAME";
 const slack_token = "YOUR_SLACK_APP_API_TOKEN";
 const slack_channel = "YOUR_ESA_RESOPNSE_CHANNEL";
 
+/** 
+  doPost  
+  slack側でesaスタンプの後、GASでリクエスト受取  
+**/
 function doPost(e){
   let params = JSON.parse(e.postData.getDataAsString());
   let channel = params.event.item.channel;
@@ -27,8 +31,12 @@ function doPost(e){
 
   return ContentService.createTextOutput(params.challenge);
 }
+
+/** 
+  esaPost 
+  esaに投稿する  
+**/
 function esaPost(postMessage) {
-  // アクセス先
   const headers = {
       'Authorization': 'Bearer ' + esa_access_token,
   };
@@ -48,13 +56,16 @@ function esaPost(postMessage) {
     contentType: 'application/json; charset=utf-8',
     payload : JSON.stringify(payload) || {}
   }
-  // アクセス先
   const post_url = "https://api.esa.io/v1/teams/"+ team_name +"/posts";
   // POSTリクエスト
   const response = UrlFetchApp.fetch(post_url, options);
   return JSON.parse(response);
 }
 
+/** 
+  getSlackMessage 
+  slackに投稿されたテキストを取得  
+**/
 function getSlackMessage(channel,ts){
   const baseUrl = 'https://slack.com/api/conversations.replies';
   const baseParameters = [
@@ -71,6 +82,10 @@ function getSlackMessage(channel,ts){
     return res;
 }
 
+/** 
+  postSlackMessage  
+  slackに投稿完了を通知 
+**/
 function postSlackMessage(message){
   const url = "https://slack.com/api/chat.postMessage";
   
@@ -88,6 +103,11 @@ function postSlackMessage(message){
   // Slackに投稿する
   UrlFetchApp.fetch(url, params);    
 }
+
+/** 
+  getThreadUrl  
+  ThreadURL情報を取得  
+**/
 function getThreadUrl(channel,ts){
   let domain = getSlackTeamInfo().team.domain;
   let baseUrl = "https://" + domain + ".slack.com/archives/";
@@ -95,6 +115,11 @@ function getThreadUrl(channel,ts){
   let url = baseUrl + channel + "/" + url_ts;
   return url;
 }
+
+/** 
+  getSlackTeamInfo  
+  slackTeamInfo情報を取得  
+**/
 function getSlackTeamInfo(){
   const baseUrl = 'https://slack.com/api/team.info';
   const parameters = [
@@ -107,6 +132,11 @@ function getSlackTeamInfo(){
     res = JSON.parse(res);
     return res;
 }
+
+/** 
+  getSlackUserInfo  
+  slackUseerInfo情報を取得 
+**/
 function getSlackUserInfo(user){
   const baseUrl = 'https://slack.com/api/users.info';
   const baseParameters = [
