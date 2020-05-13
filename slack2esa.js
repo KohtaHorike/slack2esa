@@ -3,14 +3,15 @@
 const esa_access_token = "YOUR_ESA_ACCESS_TOKEN";
 const esa_post_tag = [];//option
 const team_name ="YOUR_ESA_TEAM_NAME";
+const esa_directory = "slack/";
 
 /**slack設定**/
 const slack_token = "YOUR_SLACK_APP_API_TOKEN";
 const slack_channel = "YOUR_ESA_RESOPNSE_CHANNEL";
 
-/** 
-  doPost  
-  slack側でesaスタンプの後、GASでリクエスト受取  
+/**	
+	doPost	
+	slack側でesaスタンプの後、GASでリクエスト受取	
 **/
 function doPost(e){
   let params = JSON.parse(e.postData.getDataAsString());
@@ -23,6 +24,10 @@ function doPost(e){
     let postMessage = slackMessageData.messages[0].text;
     let threadUrl = getThreadUrl(channel,ts);
     let userName = getSlackUserInfo(slackMessageData.messages[0].user).user.real_name;
+    if(postMessage == "" || postMessage == undefined){
+      postSlackMessage("テキストが不適切のため投稿できませんでした。");
+      return false;
+    }
     postMessage += "\n 投稿URL:" + threadUrl +"\n 投稿者:" + userName;  
     let esaRes = esaPost(postMessage);
     let msg = unescape(esaRes.name) + "\n" + esaRes.url + "\n 投稿URL" + threadUrl;
@@ -32,18 +37,18 @@ function doPost(e){
   return ContentService.createTextOutput(params.challenge);
 }
 
-/** 
-  esaPost 
-  esaに投稿する  
+/**	
+	esaPost	
+	esaに投稿する	
 **/
 function esaPost(postMessage) {
   const headers = {
       'Authorization': 'Bearer ' + esa_access_token,
   };
-    
+  
   // POSTデータ
   let payload = {
-    name: 'slack/' + postMessage.substr(0,5),
+    name: esa_directory + postMessage.substr(0,10),
     body_md : postMessage,
     tags : esa_post_tag,
     wip : true
@@ -62,9 +67,9 @@ function esaPost(postMessage) {
   return JSON.parse(response);
 }
 
-/** 
-  getSlackMessage 
-  slackに投稿されたテキストを取得  
+/**	
+	getSlackMessage	
+	slackに投稿されたテキストを取得	
 **/
 function getSlackMessage(channel,ts){
   const baseUrl = 'https://slack.com/api/conversations.replies';
@@ -82,9 +87,9 @@ function getSlackMessage(channel,ts){
     return res;
 }
 
-/** 
-  postSlackMessage  
-  slackに投稿完了を通知 
+/**	
+	postSlackMessage	
+	slackに投稿完了を通知	
 **/
 function postSlackMessage(message){
   const url = "https://slack.com/api/chat.postMessage";
@@ -104,9 +109,9 @@ function postSlackMessage(message){
   UrlFetchApp.fetch(url, params);    
 }
 
-/** 
-  getThreadUrl  
-  ThreadURL情報を取得  
+/**	
+	getThreadUrl	
+	ThreadURL情報を取得	
 **/
 function getThreadUrl(channel,ts){
   let domain = getSlackTeamInfo().team.domain;
@@ -116,9 +121,9 @@ function getThreadUrl(channel,ts){
   return url;
 }
 
-/** 
-  getSlackTeamInfo  
-  slackTeamInfo情報を取得  
+/**	
+	getSlackTeamInfo	
+	slackTeamInfo情報を取得	
 **/
 function getSlackTeamInfo(){
   const baseUrl = 'https://slack.com/api/team.info';
@@ -133,9 +138,9 @@ function getSlackTeamInfo(){
     return res;
 }
 
-/** 
-  getSlackUserInfo  
-  slackUseerInfo情報を取得 
+/**	
+	getSlackUserInfo	
+	slackUseerInfo情報を取得	
 **/
 function getSlackUserInfo(user){
   const baseUrl = 'https://slack.com/api/users.info';
