@@ -10,8 +10,7 @@ Slack内で、esaスタンプ（任意のスタンプでOK）を設定し、保�
 ![ezgif-3-f66f8cf7b082](https://user-images.githubusercontent.com/622576/81878693-bff6b800-95c3-11ea-95f7-58b83dbfa8f0.gif)
  
 # Features
- 
-"hoge"のセールスポイントや差別化などを説明する
+
  
 # Requirement
   
